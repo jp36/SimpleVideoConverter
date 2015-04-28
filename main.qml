@@ -14,10 +14,13 @@ ApplicationWindow {
     visible: true
 
     property int margin: 5
-    readonly property string defaultVideoArg: "ffmpeg -i <source>.mov -pix_fmt yuv420p -vcodec libx264 -acodec libfaac <output>.mp4"
-    readonly property string defaultPodcastArg: "ffmpeg -i <input>.mp4 -b:a 192K -vn <output>.mp3"
+    readonly property string defaultVideoArg: "-i <source>.mov -pix_fmt yuv420p -vcodec libx264 -acodec libfaac <output>.mp4"
+    readonly property string defaultPodcastArg: "-i <input>.mp4 -b:a 192K -vn <output>.mp3"
     readonly property string defaultSourceName: "blah"
     readonly property string defaultOutputName: "crossway"
+
+    property string videoArgumentString;
+    property string podcastArgumentString;
 
     menuBar: MenuBar {
         Menu {
@@ -161,7 +164,18 @@ ApplicationWindow {
             Button {
                 id: convertButton
                 text: "Convert"
-                onClicked: console.log("convert")
+                onClicked: {
+                    if(SettingsHelper.value("sourcePath", "")==="")
+                    {
+                        errorDialog.text = "Source Path not set";
+                        errorDialog.open();
+                    } else if(SettingsHelper.value("location1Path", "")==="")
+                    {
+                        errorDialog.text = "Google Drive Location not set";
+                        errorDialog.open();
+                    }
+//                    videoArgumentString =
+                }
             }
         }
     }
@@ -188,6 +202,16 @@ ApplicationWindow {
         }
         onRejected: {
             fileDialog.close();
+        }
+    }
+
+    MessageDialog {
+        id: errorDialog
+        title: "Error"
+        icon: StandardIcon.Critical
+        standardButtons: StandardButton.Ok
+        onAccepted: {
+            errorDialog.close()
         }
     }
 

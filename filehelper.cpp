@@ -35,12 +35,18 @@ void FileHelper::start(QString argumentString)
 
 QString FileHelper::getStandardOutput()
 {
-    return ffmpegProcess->readAllStandardOutput();
+    if(ffmpegProcess!=NULL)
+        return ffmpegProcess->readAllStandardOutput();
+    else
+        return QString();
 }
 
 QString FileHelper::getStandardError()
 {
-    return ffmpegProcess->readAllStandardError();
+    if(ffmpegProcess!=NULL)
+        return ffmpegProcess->readAllStandardError();
+    else
+        return QString();
 }
 
 void FileHelper::cancel()
