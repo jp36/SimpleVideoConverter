@@ -15,7 +15,7 @@ public:
     Q_INVOKABLE bool fileExists(QString path);
 
 public slots:
-    void start(QString argumentString);
+    void start();
     QString getStandardOutput();
     QString getStandardError();
     void cancel();

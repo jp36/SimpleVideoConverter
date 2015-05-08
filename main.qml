@@ -15,8 +15,8 @@ ApplicationWindow {
     id: root
 
     property int margin: 5
-    readonly property string defaultVideoArg: "-i <source>.mov -pix_fmt yuv420p -vcodec libx264 -acodec libfaac <output>.mp4"
-    readonly property string defaultPodcastArg: "-i <input>.mp4 -b:a 192K -vn <output>.mp3"
+    readonly property string defaultVideoArg: "-i <source> -pix_fmt yuv420p -vcodec libx264 -acodec libfaac <output>.mp4"
+    readonly property string defaultPodcastArg: "-i <input> -b:a 192K -vn <output>.mp3"
     readonly property string defaultSourceName: "blah"
     readonly property string defaultOutputName: "crossway"
 
@@ -26,10 +26,6 @@ ApplicationWindow {
     menuBar: MenuBar {
         Menu {
             title: qsTr("&File")
-            MenuItem {
-                text: qsTr("&Open")
-                onTriggered: messageDialog.show(qsTr("Open action triggered"));
-            }
             MenuItem {
                 text: qsTr("E&xit")
                 onTriggered: Qt.quit();
@@ -161,7 +157,7 @@ ApplicationWindow {
             Layout.fillHeight: true
             Layout.fillWidth: true
             readOnly: true
-            text: "Lorem ipsum dolor sit amet, consectetur adipisicing elit, "
+            text: "Please select the locations above, then click Convert below!"
         }
 
         RowLayout {
@@ -179,16 +175,7 @@ ApplicationWindow {
                 text: "Convert"
                 enabled: sourcePath.text!="" && location1Path.text!=""
                 onClicked: {
-                    if(SettingsHelper.value("sourcePath", "")==="")
-                    {
-                        errorDialog.text = "Source Path not set";
-                        errorDialog.open();
-                    } else if(SettingsHelper.value("location1Path", "")==="")
-                    {
-                        errorDialog.text = "Google Drive Location not set";
-                        errorDialog.open();
-                    }
-//                    videoArgumentString =
+                    FileHelper.start();
                 }
             }
         }
@@ -381,7 +368,7 @@ ApplicationWindow {
 
         function showValues() {
             videoArg.text = SettingsHelper.value("videoArg", defaultVideoArg);
-            podcastArg.text = SettingsHelper.value("videoArg", defaultVideoArg);
+            podcastArg.text = SettingsHelper.value("podcastArg", defaultPodcastArg);
             sourceName.text = SettingsHelper.value("sourceName", defaultSourceName);
             outputName.text = SettingsHelper.value("outputName", defaultOutputName);
         }

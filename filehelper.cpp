@@ -3,6 +3,8 @@
 #include <QDir>
 #include <QUrl>
 #include <QDebug>
+#include <QSettings>
+#include <QDirIterator>
 
 FileHelper::FileHelper(QObject *parent)
     : QObject(parent)
@@ -20,17 +22,46 @@ bool FileHelper::fileExists(QString path)
     return QDir(path).exists();
 }
 
-void FileHelper::start(QString argumentString)
+void FileHelper::start()
 {
-    ffmpegProcess = new QProcess(this);
-    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-    ffmpegProcess->setProcessEnvironment(env);
-    connect(ffmpegProcess, &QProcess::started, this, &FileHelper::processStarted);
-    connect(ffmpegProcess, &QProcess::readyReadStandardOutput, this, &FileHelper::readyReadStandardOutput);
-    connect(ffmpegProcess, &QProcess::readyReadStandardError, this, &FileHelper::readyReadStandardError);
-    connect(ffmpegProcess, (void (QProcess::*)(int,QProcess::ExitStatus))(&QProcess::finished), this, &FileHelper::handleFinish);
-    qDebug() << QDir::currentPath()+"ffmpeg.exe" << argumentString;
+    QSettings settings;
+    qDebug() << "starting";
+    QString argString = settings.value("videoArg", "").toString();
+    QString sourcePath = settings.value("sourcePath", "").toString();
+    QDirIterator dirIt(sourcePath);
+    QString biggestFileName;
+    int biggestNumber=0;
+    while(dirIt.hasNext())
+    {
+        dirIt.next();
+        if(dirIt.fileName().startsWith(settings.value("sourceName", "").toString()))
+        {
+            qDebug() << "Found possible file";
+            QString tempString = dirIt.fileInfo().baseName().replace(settings.value("sourceName", "").toString(), "");\
+            int number = tempString.toDouble();
+            qDebug() << number;
+            if(number>biggestNumber)
+            {
+                biggestFileName = dirIt.fileName();
+                biggestNumber = number;
+            }
+        }
+    }
+    QString finalSourcePath = sourcePath + biggestFileName;
+    qDebug() << finalSourcePath;
+    QDir sourceDir(settings.value("sourcePath", "").toString());
+    if(sourceDir.exists())
+    {
+//    ffmpegProcess = new QProcess(this);
+//    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+//    ffmpegProcess->setProcessEnvironment(env);
+//    connect(ffmpegProcess, &QProcess::started, this, &FileHelper::processStarted);
+//    connect(ffmpegProcess, &QProcess::readyReadStandardOutput, this, &FileHelper::readyReadStandardOutput);
+//    connect(ffmpegProcess, &QProcess::readyReadStandardError, this, &FileHelper::readyReadStandardError);
+//    connect(ffmpegProcess, (void (QProcess::*)(int,QProcess::ExitStatus))(&QProcess::finished), this, &FileHelper::handleFinish);
+//    qDebug() << QDir::currentPath()+"ffmpeg.exe" << argString;
     //    ffmpegProcess.start(QDir::currentPath()+"ffmpeg.exe", argumentString);
+    }
 }
 
 QString FileHelper::getStandardOutput()
