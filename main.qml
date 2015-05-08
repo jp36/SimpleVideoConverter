@@ -12,6 +12,7 @@ ApplicationWindow {
     width: 640
     height: 480
     visible: true
+    id: root
 
     property int margin: 5
     readonly property string defaultVideoArg: "-i <source>.mov -pix_fmt yuv420p -vcodec libx264 -acodec libfaac <output>.mp4"
@@ -65,6 +66,12 @@ ApplicationWindow {
                 onEditingFinished: {
                     SettingsHelper.setValue("sourcePath", text);
                 }
+                Rectangle {
+                    anchors.fill: parent
+                    border.color: "red"
+                    color: "transparent"
+                    visible: sourcePath.text==""
+                }
             }
             Button {
                 text: "Browse"
@@ -97,6 +104,12 @@ ApplicationWindow {
                 text: SettingsHelper.value("location1Path", "");
                 onEditingFinished: {
                     SettingsHelper.setValue("location1Path", text);
+                }
+                Rectangle {
+                    anchors.fill: parent
+                    border.color: "red"
+                    color: "transparent"
+                    visible: location1Path.text==""
                 }
             }
             Button {
@@ -164,6 +177,7 @@ ApplicationWindow {
             Button {
                 id: convertButton
                 text: "Convert"
+                enabled: sourcePath.text!="" && location1Path.text!=""
                 onClicked: {
                     if(SettingsHelper.value("sourcePath", "")==="")
                     {
@@ -235,19 +249,25 @@ ApplicationWindow {
         title: "Settings"
         width: 600
         height: 200
-        standardButtons: StandardButton.Cancel | StandardButton.Save | StandardButton.RestoreDefaults
+//        standardButtons: StandardButton.Cancel | StandardButton.Save | StandardButton.RestoreDefaults
 
-        Rectangle {
+        contentItem: Rectangle {
             id: contentHolder
-            color: "lightgray"
+            SystemPalette { id: myPalette; colorGroup: SystemPalette.Active }
+//            color: "lightgray"
+            color: myPalette.window
             property bool resetTextFields
+            implicitHeight: settingsDialog.height
+            implicitWidth: settingsDialog.width
             anchors {
-                margins: margin
-                fill: parent
+                centerIn: parent
             }
             ColumnLayout {
                 spacing: margin
-                width: parent.width
+                anchors.centerIn: parent
+                width: parent.width-margin*2
+                height: parent.height-margin*2
+
                 RowLayout {
                     spacing: margin
                     Layout.fillWidth: true
@@ -258,6 +278,12 @@ ApplicationWindow {
                     TextField {
                         id: videoArg
                         Layout.fillWidth: true
+                        Rectangle {
+                            anchors.fill: parent
+                            border.color: "red"
+                            color: "transparent"
+                            visible: videoArg.text==""
+                        }
                     }
                 }
                 RowLayout {
@@ -270,6 +296,12 @@ ApplicationWindow {
                     TextField {
                         id: podcastArg
                         Layout.fillWidth: true
+                        Rectangle {
+                            anchors.fill: parent
+                            border.color: "red"
+                            color: "transparent"
+                            visible: podcastArg.text==""
+                        }
                     }
                 }
                 RowLayout {
@@ -282,6 +314,12 @@ ApplicationWindow {
                     TextField {
                         id: sourceName
                         Layout.fillWidth: true
+                        Rectangle {
+                            anchors.fill: parent
+                            border.color: "red"
+                            color: "transparent"
+                            visible: sourceName.text==""
+                        }
                     }
                 }
                 RowLayout {
@@ -294,10 +332,53 @@ ApplicationWindow {
                     TextField {
                         id: outputName
                         Layout.fillWidth: true
+                        Rectangle {
+                            anchors.fill: parent
+                            border.color: "red"
+                            color: "transparent"
+                            visible: outputName.text==""
+                        }
+                    }
+                }
+                Rectangle {
+                    id: filler
+                    Layout.fillHeight: true
+                    Layout.preferredWidth: 0
+                }
+                //replaced standard buttons with custom buttons so that Save can be disabled if invalid settings
+                RowLayout {
+                    spacing: margin
+                    Layout.fillWidth: true
+                    layoutDirection: Qt.RightToLeft
+                    Button {
+                        text: "Save"
+                        enabled: videoArg.text!="" && podcastArg.text!="" && sourceName.text!="" && outputName.text!=""
+                        onClicked: {
+                            settingsDialog.accepted()
+                            settingsDialog.close()
+                        }
+                    }
+                    Button {
+                        text: "Cancel"
+                        onClicked: settingsDialog.rejected()
+                    }
+                    Rectangle {
+                        id: spacer
+                        Layout.fillWidth: true
+                    }
+                    Button {
+                        text: "Restore Defaults"
+                        onClicked: settingsDialog.reset()
                     }
                 }
             }
         }
+
+        Component.onCompleted: {
+//            settingsDialog.saveButton.enabled = false
+//            console.log(JSON.stringify(settingsDialog))
+        }
+
         function showValues() {
             videoArg.text = SettingsHelper.value("videoArg", defaultVideoArg);
             podcastArg.text = SettingsHelper.value("videoArg", defaultVideoArg);
@@ -307,10 +388,13 @@ ApplicationWindow {
 
         function saveValues()
         {
+            if(videoArg.text==="" || podcastArg.text==="" || sourceName.text==="" || outputName.text==="")
+                return false;
             SettingsHelper.setValue("videoArg", videoArg.text)
             SettingsHelper.setValue("podcastArg", podcastArg.text)
             SettingsHelper.setValue("sourceName", sourceName.text)
             SettingsHelper.setValue("outputName", outputName.text)
+            return true;
         }
         function setDefaultValues() {
             videoArg.text = defaultVideoArg;
