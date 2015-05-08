@@ -47,11 +47,11 @@ void FileHelper::start()
             }
         }
     }
-    QString finalSourcePath = sourcePath + biggestFileName;
+    QString finalSourcePath = sourcePath + "/" + biggestFileName;
     qDebug() << finalSourcePath;
-    QDir sourceDir(settings.value("sourcePath", "").toString());
-    if(sourceDir.exists())
-    {
+    QString location1Path = settings.value("location1Path", "").toString() + "/" + settings.value("outputName", "").toString();
+    argString.replace("<source>", finalSourcePath).replace("<output>", location1Path);
+    qDebug() << argString;
 //    ffmpegProcess = new QProcess(this);
 //    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
 //    ffmpegProcess->setProcessEnvironment(env);
@@ -61,7 +61,6 @@ void FileHelper::start()
 //    connect(ffmpegProcess, (void (QProcess::*)(int,QProcess::ExitStatus))(&QProcess::finished), this, &FileHelper::handleFinish);
 //    qDebug() << QDir::currentPath()+"ffmpeg.exe" << argString;
     //    ffmpegProcess.start(QDir::currentPath()+"ffmpeg.exe", argumentString);
-    }
 }
 
 QString FileHelper::getStandardOutput()
