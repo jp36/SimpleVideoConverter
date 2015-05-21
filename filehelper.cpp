@@ -101,6 +101,7 @@ QString FileHelper::getOutput()
     {
         retValue.append(QString::fromLocal8Bit(ffmpegProcess->readLine()));
     }
+    //Really not sure why I have to do below, but otherwise I get retValues of ""
     if(retValue == "")
         retValue = ffmpegProcess->readAllStandardOutput();
     return retValue;
