@@ -5,6 +5,8 @@
 #include <QDebug>
 #include <QSettings>
 #include <QDirIterator>
+#include <QCoreApplication>
+#include <QDate>
 
 FileHelper::FileHelper(QObject *parent)
     : QObject(parent)
@@ -24,6 +26,7 @@ bool FileHelper::fileExists(QString path)
 
 void FileHelper::start()
 {
+    secondConversion = false;
     QSettings settings;
     qDebug() << "starting";
     QString argString = settings.value("videoArg", "").toString();
@@ -49,34 +52,58 @@ void FileHelper::start()
     }
     QString finalSourcePath = sourcePath + "/" + biggestFileName;
     qDebug() << finalSourcePath;
-    QString location1Path = settings.value("location1Path", "").toString() + "/" + settings.value("outputName", "").toString();
+    location1Path = settings.value("location1Path", "").toString() + "/" + settings.value("outputName", "").toString() + "_" + QDate::currentDate().toString("yyyy_MM_dd");
     argString.replace("<source>", finalSourcePath).replace("<output>", location1Path);
-    qDebug() << argString;
-//    ffmpegProcess = new QProcess(this);
-//    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-//    ffmpegProcess->setProcessEnvironment(env);
-//    connect(ffmpegProcess, &QProcess::started, this, &FileHelper::processStarted);
-//    connect(ffmpegProcess, &QProcess::readyReadStandardOutput, this, &FileHelper::readyReadStandardOutput);
-//    connect(ffmpegProcess, &QProcess::readyReadStandardError, this, &FileHelper::readyReadStandardError);
-//    connect(ffmpegProcess, (void (QProcess::*)(int,QProcess::ExitStatus))(&QProcess::finished), this, &FileHelper::handleFinish);
-//    qDebug() << QDir::currentPath()+"ffmpeg.exe" << argString;
-    //    ffmpegProcess.start(QDir::currentPath()+"ffmpeg.exe", argumentString);
+//    qDebug() << argString;
+    ffmpegProcess = new QProcess(this);
+    ffmpegProcess->setProcessChannelMode(QProcess::MergedChannels);
+    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+    ffmpegProcess->setProcessEnvironment(env);
+    connect(ffmpegProcess, &QProcess::started, this, &FileHelper::processStarted);
+    connect(ffmpegProcess, &QProcess::readyReadStandardOutput, this, &FileHelper::readyRead);
+    connect(ffmpegProcess, &QProcess::readyReadStandardError, this, &FileHelper::readyRead);
+    connect(ffmpegProcess, (void (QProcess::*)(int,QProcess::ExitStatus))(&QProcess::finished), this, &FileHelper::handleFinish);
+//    connect(ffmpegProcess, (void (QProcess::*)(QProcess::ProcessError))(&QProcess::error), this, &FileHelper::handleFinish);
+    qDebug() << QFileInfo(QCoreApplication::applicationFilePath()).canonicalPath()+"/ffmpeg.exe " + argString;
+//    qDebug() << QDir::currentPath()+"/ffmpeg.exe " + argString;
+//    QStringList argList = argString.sp
+//    qDebug() << splitArgumentString(argString);
+//    ffmpegProcess->start(QFileInfo(QCoreApplication::applicationFilePath()).canonicalPath()+"/ffmpeg.exe", splitArgumentString(argString));
+    ffmpegProcess->start(QFileInfo(QCoreApplication::applicationFilePath()).canonicalPath()+"/ffmpeg.exe " + argString);
 }
 
-QString FileHelper::getStandardOutput()
+
+void FileHelper::startSecondConversion()
 {
-    if(ffmpegProcess!=NULL)
-        return ffmpegProcess->readAllStandardOutput();
-    else
-        return QString();
+    secondConversion = true;
+    QSettings settings;
+    qDebug() << "starting";
+    QString argString = settings.value("podcastArg", "").toString();
+    argString.replace("<input>", location1Path).replace("<output>", location1Path);
+    //delete old
+    ffmpegProcess->deleteLater();
+    //start new
+    ffmpegProcess = new QProcess(this);
+    ffmpegProcess->setProcessChannelMode(QProcess::MergedChannels);
+    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+    ffmpegProcess->setProcessEnvironment(env);
+    connect(ffmpegProcess, &QProcess::started, this, &FileHelper::processStarted);
+    connect(ffmpegProcess, &QProcess::readyReadStandardOutput, this, &FileHelper::readyRead);
+    connect(ffmpegProcess, &QProcess::readyReadStandardError, this, &FileHelper::readyRead);
+    connect(ffmpegProcess, (void (QProcess::*)(int,QProcess::ExitStatus))(&QProcess::finished), this, &FileHelper::handleFinish);
+    ffmpegProcess->start(QFileInfo(QCoreApplication::applicationFilePath()).canonicalPath()+"/ffmpeg.exe " + argString);
 }
 
-QString FileHelper::getStandardError()
+QString FileHelper::getOutput()
 {
-    if(ffmpegProcess!=NULL)
-        return ffmpegProcess->readAllStandardError();
-    else
-        return QString();
+    QString retValue;
+    while(ffmpegProcess->canReadLine())
+    {
+        retValue.append(QString::fromLocal8Bit(ffmpegProcess->readLine()));
+    }
+    if(retValue == "")
+        retValue = ffmpegProcess->readAllStandardOutput();
+    return retValue;
 }
 
 void FileHelper::cancel()
@@ -88,10 +115,27 @@ void FileHelper::cancel()
     ffmpegProcess = NULL;
 }
 
+QStringList FileHelper::splitArgumentString(QString argString)
+{
+    QStringList list;
+
+    // Add str sections to list including Sep and clear space at begin/end
+    for( int i = 0; i < argString.count( '-' ); ++i ){
+        list << argString.section( '-', i, i, QString::SectionIncludeLeadingSep|QString::SectionSkipEmpty ).simplified();
+    }
+    return list;
+}
+
 void FileHelper::handleFinish(int exitCode, QProcess::ExitStatus exitStatus)
 {
-    ffmpegProcess->deleteLater();
-    ffmpegProcess = NULL;
-    emit encodingFinished();
+    if(secondConversion)
+    {
+        secondConversion = false;
+        ffmpegProcess->deleteLater();
+        ffmpegProcess = NULL;
+        emit encodingFinished();
+    }
+    else
+        startSecondConversion();
 }
 

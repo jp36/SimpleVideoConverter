@@ -15,13 +15,15 @@ ApplicationWindow {
     id: root
 
     property int margin: 5
-    readonly property string defaultVideoArg: "-i <source> -pix_fmt yuv420p -vcodec libx264 -acodec libfaac <output>.mp4"
-    readonly property string defaultPodcastArg: "-i <input> -b:a 192K -vn <output>.mp3"
+    readonly property string defaultVideoArg: "-i <source> -pix_fmt yuv420p -vcodec libx264 -acodec aac -strict -2 -y <output>.mp4"
+    readonly property string defaultPodcastArg: "-i <input>.mp4 -b:a 192K -vn -y <output>.mp3"
     readonly property string defaultSourceName: "blah"
     readonly property string defaultOutputName: "crossway"
 
     property string videoArgumentString;
     property string podcastArgumentString;
+
+    property bool isConverting: false;
 
     menuBar: MenuBar {
         Menu {
@@ -168,17 +170,47 @@ ApplicationWindow {
             Button {
                 id: closeButton
                 text: "Close"
+                enabled: !isConverting
                 onClicked: Qt.quit();
             }
             Button {
                 id: convertButton
-                text: "Convert"
+                text: isConverting ? "Cancel" : "Convert"
                 enabled: sourcePath.text!="" && location1Path.text!=""
                 onClicked: {
-                    FileHelper.start();
+                    if(isConverting)
+                    {
+                        isConverting=false;
+                        FileHelper.cancel();
+                    }
+                    else
+                    {
+                        isConverting = true;
+                        ffmpegOutput.text = "Starting conversion..."
+                        FileHelper.start();
+                    }
                 }
             }
         }
+    }
+
+    Component.onCompleted: {
+        FileHelper.readyRead.connect(readyRead);
+        FileHelper.encodingFinished.connect(finished);
+    }
+
+    Component.onDestruction: {
+        FileHelper.readyRead.disconnect(readyRead);
+        FileHelper.encodingFinished.disconnect(finished);
+    }
+
+    function readyRead() {
+        ffmpegOutput.append(FileHelper.getOutput());
+    }
+
+    function finished() {
+        isConverting = false;
+        ffmpegOutput.append("---------------------------Done---------------------------")
     }
 
     FileDialog {

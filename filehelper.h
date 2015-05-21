@@ -16,21 +16,25 @@ public:
 
 public slots:
     void start();
-    QString getStandardOutput();
-    QString getStandardError();
+    QString getOutput();
     void cancel();
+
+protected:
+    QStringList splitArgumentString(QString argString);
+    void startSecondConversion();
 
 protected slots:
     void handleFinish(int exitCode, QProcess::ExitStatus exitStatus);
 
 signals:
    void processStarted();
-   void readyReadStandardOutput();
-   void readyReadStandardError();
+   void readyRead();
    void encodingFinished();
 
 private:
    QProcess* ffmpegProcess;
+   QString location1Path;
+   bool secondConversion;
 };
 
 #endif // FILEHELPER_H
