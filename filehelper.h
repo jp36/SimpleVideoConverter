@@ -20,8 +20,8 @@ public slots:
     void cancel();
 
 protected:
-    QStringList splitArgumentString(QString argString);
     void startSecondConversion();
+    QStack<QString> recursiveDateSearch(QStack<QString> resultStack, QString path, QString startsWith, int lastNum, QDateTime lastVideoTime);
 
 protected slots:
     void handleFinish(int exitCode, QProcess::ExitStatus exitStatus);
@@ -35,6 +35,7 @@ private:
    QProcess* ffmpegProcess;
    QString location1Path;
    bool secondConversion;
+   const qlonglong maxMultiFileTimeCutoff;
 };
 
 #endif // FILEHELPER_H

@@ -6,7 +6,7 @@
 #include "settingshelper.h"
 #include "filehelper.h"
 
-const char* uri = "org.crossway.converter";
+//const char* uri = "org.crossway.converter";
 
 QObject *settingsHelper_provider(QQmlEngine *engine, QJSEngine * scriptEngine)
 {
@@ -26,6 +26,7 @@ int main(int argc, char *argv[])
 
     QQmlApplicationEngine engine;
 
+    //add custom c++ types to qml
     engine.rootContext()->setContextProperty("SettingsHelper", new SettingsHelper());
     engine.rootContext()->setContextProperty("FileHelper", new FileHelper());
 

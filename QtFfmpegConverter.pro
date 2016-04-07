@@ -19,12 +19,11 @@ HEADERS += \
     filehelper.h
 
 win32:{
-
+#windows code for copying ffmpeg to the built directory
     file_pathes += "\"$$PWD/libs/ffmpeg-win32/bin/ffmpeg.exe\""
 
     CONFIG(release, debug|release):{
         destination_pathes += $$OUT_PWD/release/
-#        destination_pathes += Path/To/Deploy/Directory
     }
     else:CONFIG(debug, debug|release):{
         destination_pathes += $$OUT_PWD/debug/

@@ -15,10 +15,15 @@ ApplicationWindow {
     id: root
 
     property int margin: 5
-    readonly property string defaultVideoArg: "-i <source> -pix_fmt yuv420p -vcodec libx264 -acodec aac -strict -2 -y <output>.mp4"
+    //fully working example video arg string for combing mov files in expected format:
+    //-f concat -i <source> -pix_fmt yuv420p -vcodec libx264 -acodec aac -strict -2 -y -filter_complex "pan=stereo|c0=FL|c1=FR, aformat=channel_layouts=stereo" <output>.mp4
+    //to lower file size adjust -crf (use 18-24, the lower the number the bigger the file size)
+    //to make conversion faster, you could add -preset fast (or -preset ultrafast)
+    //TODO check if -filter_complex stuff is actually needed on real files
+    readonly property string defaultVideoArg: "-f concat -i <source> -pix_fmt yuv420p -vcodec libx264 -acodec aac -strict -2 -y -filter_complex \"pan=stereo|c0=FL|c1=FR, aformat=channel_layouts=stereo\" <output>.mp4"
     readonly property string defaultPodcastArg: "-i <input>.mp4 -b:a 192K -vn -y <output>.mp3"
-    readonly property string defaultSourceName: "blah"
-    readonly property string defaultOutputName: "crossway"
+    readonly property string defaultSourceName: "Capture"
+    readonly property string defaultOutputName: "Service"
 
     property string videoArgumentString;
     property string podcastArgumentString;
@@ -160,6 +165,10 @@ ApplicationWindow {
             Layout.fillWidth: true
             readOnly: true
             text: "Please select the locations above, then click Convert below!"
+            onLineCountChanged: {
+                if(lineCount>5000)
+                    remove(0, length/lineCount * 2);
+            }
         }
 
         RowLayout {
