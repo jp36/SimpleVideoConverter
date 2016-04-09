@@ -2,15 +2,11 @@
 
 #include <QFile>
 
-#include <QDebug>
-
 AsyncIO::AsyncIO(QString inExistingFilePath, QString inNewFilePath, QObject *parent)
     : QObject(parent)
 {
     existingFilePath = inExistingFilePath.replace("\"", "");
     newFilePath = inNewFilePath.replace("\"", "");
-    qDebug() << "existing = " << existingFilePath;
-    qDebug() << "New = " << newFilePath;
 }
 
 AsyncIO::~AsyncIO()

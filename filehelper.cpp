@@ -93,7 +93,6 @@ QString FileHelper::getPath(QString settingString, QDate date)
 {
     QSettings settings;
     QString locationSettingString = settings.value(settingString, "").toString();
-    qDebug() << "location setting" << locationSettingString;
     if(""!=locationSettingString)
         return "\"" + locationSettingString + "/" + settings.value("outputName", "").toString() + "_" + date.toString("yyyy_MM_dd") + "\"";
     else
