@@ -8,9 +8,12 @@
 #include <QCoreApplication>
 #include <QDate>
 #include <QStack>
+#include <QThread>
+
+#include "asyncio.h"
 
 FileHelper::FileHelper(QObject *parent)
-    : QObject(parent), maxMultiFileTimeCutoff(7201)//2 hours & 1 second
+    : QObject(parent), secondCopy(false), maxMultiFileTimeCutoff(7201)//2 hours & 1 second
 {
 }
 
@@ -57,6 +60,46 @@ QStack<QString> FileHelper::recursiveDateSearch(QStack<QString> resultStack, QSt
     return resultStack;
 }
 
+void FileHelper::startCopy()
+{
+    QSettings settings;
+    QString extension;
+    if(secondCopy)
+        extension = settings.value("podcastArg").toString().split("<output>")[1];
+    else
+        extension = settings.value("videoArg").toString().split("<output>")[1];
+    //spawn thread
+    QThread* thread = new QThread;
+    //location1 = existing
+    //location2 = copy destination
+    AsyncIO* worker = new AsyncIO(location1Path + extension, location2Path + extension);
+    worker->moveToThread(thread);
+
+    //handle filehelper signal connections
+    connect(worker, &AsyncIO::progressUpdate, this, &FileHelper::copyProgress);
+    connect(worker, &AsyncIO::error, this, &FileHelper::copyError);
+    connect(worker, &AsyncIO::finished, this, &FileHelper::copyFinished);
+    //thread start starts copy once thread strated
+    connect(thread, &QThread::started, worker, &AsyncIO::startCopy);
+    //when finished recieved tell the thread to quit and then tell worker
+    //and thread to delete themselves after finished
+    connect(worker, &AsyncIO::finished, thread, &QThread::quit);
+    connect(worker, &AsyncIO::finished, worker, &AsyncIO::deleteLater);
+    connect(thread, &QThread::finished, thread, &QThread::deleteLater);
+    thread->start();
+}
+
+QString FileHelper::getPath(QString settingString, QDate date)
+{
+    QSettings settings;
+    QString locationSettingString = settings.value(settingString, "").toString();
+    qDebug() << "location setting" << locationSettingString;
+    if(""!=locationSettingString)
+        return "\"" + locationSettingString + "/" + settings.value("outputName", "").toString() + "_" + date.toString("yyyy_MM_dd") + "\"";
+    else
+        return locationSettingString;//return nothing
+}
+
 //start conversion
 void FileHelper::start()
 {
@@ -72,7 +115,7 @@ void FileHelper::start()
     QDirIterator dirIt(sourcePath);
     //biggest in this case means biggest file number
     QString biggestFileName;
-    int biggestNumber=0;
+    int biggestNumber=-1;
     QDateTime biggestFileCreated;
     while(dirIt.hasNext())
     {
@@ -93,7 +136,7 @@ void FileHelper::start()
             }
         }
     }
-    QString finalSourcePath = sourcePath + "/" + biggestFileName;
+//    QString finalSourcePath = sourcePath + "/" + biggestFileName;
 
     //write list of split files to myfiles.txt so that the "concat" function of ffmpeg will join them together
     //TODO change this to use a QPointer
@@ -103,7 +146,6 @@ void FileHelper::start()
     QFile fileList(sourcePath + "/mylist.txt");
     fileList.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text);
     QTextStream out(&fileList);
-    QString fileString;
     while(resultStack.count()>0)
     {
         out << "file '" << resultStack.pop() << "'";
@@ -113,7 +155,9 @@ void FileHelper::start()
     fileList.close();
 
     //the escaped quotes are necessary for ffmpeg to work with paths with spaces
-    location1Path = "\"" + settings.value("location1Path", "").toString() + "/" + settings.value("outputName", "").toString() + "_" + QDate::currentDate().toString("yyyy_MM_dd") + "\"";
+    QDate currentDate = QDate::currentDate();
+    location1Path = getPath("location1Path", currentDate);
+    location2Path = getPath("location2Path", currentDate);
 //    argString.replace("<source>", finalSourcePath).replace("<output>", location1Path);
     argString.replace("<source>", sourcePath + "/mylist.txt").replace("<output>", location1Path);
 //    qDebug() << argString;
@@ -183,9 +227,24 @@ void FileHelper::handleFinish(int exitCode, QProcess::ExitStatus exitStatus)
         secondConversion = false;
         ffmpegProcess->deleteLater();
         ffmpegProcess = NULL;
-        emit encodingFinished();
+        //start copy if location2path has been defined
+        if(""==location2Path)
+            emit encodingFinished();
+        else
+            startCopy();
     }
     else
         startSecondConversion();
+}
+
+void FileHelper::copyFinished()
+{
+    if(secondCopy)
+        emit encodingFinished();
+    else
+    {
+        secondCopy = true;
+        startCopy();
+    }
 }
 

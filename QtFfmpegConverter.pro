@@ -4,7 +4,8 @@ QT += qml quick widgets
 
 SOURCES += main.cpp \
     settingshelper.cpp \
-    filehelper.cpp
+    filehelper.cpp \
+    asyncio.cpp
 
 RESOURCES += qml.qrc
 
@@ -16,7 +17,8 @@ include(deployment.pri)
 
 HEADERS += \
     settingshelper.h \
-    filehelper.h
+    filehelper.h \
+    asyncio.h
 
 win32:{
 #windows code for copying ffmpeg to the built directory

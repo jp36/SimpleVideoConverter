@@ -69,6 +69,7 @@ ApplicationWindow {
                 onEditingFinished: {
                     SettingsHelper.setValue("sourcePath", text);
                 }
+                enabled: !isConverting
                 Rectangle {
                     anchors.fill: parent
                     border.color: "red"
@@ -84,6 +85,7 @@ ApplicationWindow {
                     fileDialog.textFieldToEdit = sourcePath
                     fileDialog.open()
                 }
+                enabled: !isConverting
             }
         }
 
@@ -108,6 +110,7 @@ ApplicationWindow {
                 onEditingFinished: {
                     SettingsHelper.setValue("location1Path", text);
                 }
+                enabled: !isConverting
                 Rectangle {
                     anchors.fill: parent
                     border.color: "red"
@@ -123,6 +126,7 @@ ApplicationWindow {
                     fileDialog.textFieldToEdit = location1Path
                     fileDialog.open()
                 }
+                enabled: !isConverting
             }
         }
 
@@ -140,6 +144,7 @@ ApplicationWindow {
                 onEditingFinished: {
                     SettingsHelper.setValue("location2Path", text);
                 }
+                enabled: !isConverting
             }
             Button {
                 text: "Browse"
@@ -149,6 +154,7 @@ ApplicationWindow {
                     fileDialog.textFieldToEdit = location2Path
                     fileDialog.open()
                 }
+                enabled: !isConverting
             }
         }
 
@@ -180,12 +186,14 @@ ApplicationWindow {
                 id: closeButton
                 text: "Close"
                 enabled: !isConverting
+                activeFocusOnPress: true;
                 onClicked: Qt.quit();
             }
             Button {
                 id: convertButton
                 text: isConverting ? "Cancel" : "Convert"
                 enabled: sourcePath.text!="" && location1Path.text!=""
+                activeFocusOnPress: true;
                 onClicked: {
                     if(isConverting)
                     {
@@ -205,16 +213,30 @@ ApplicationWindow {
 
     Component.onCompleted: {
         FileHelper.readyRead.connect(readyRead);
+        FileHelper.copyProgress.connect(copyProgress);
+        FileHelper.copyError.connect(copyError);
         FileHelper.encodingFinished.connect(finished);
     }
 
     Component.onDestruction: {
         FileHelper.readyRead.disconnect(readyRead);
+        FileHelper.copyProgress.disconnect(copyProgress);
+        FileHelper.copyError.disconnect(copyError);
         FileHelper.encodingFinished.disconnect(finished);
     }
 
     function readyRead() {
         ffmpegOutput.append(FileHelper.getOutput());
+    }
+
+    function copyProgress(progress) {
+        ffmpegOutput.append("Copying file at " + progress + "%");
+    }
+
+    function copyError(error) {
+        console.log("Copy Error: " + error);
+        errorDialog.text = error;
+        errorDialog.open();
     }
 
     function finished() {
