@@ -103,6 +103,7 @@ QString FileHelper::getPath(QString settingString, QDate date)
 void FileHelper::start()
 {
     secondConversion = false;
+    canceled = false;
     QSettings settings;
     qDebug() << "starting";
     QString argString = settings.value("videoArg", "").toString();
@@ -212,6 +213,7 @@ QString FileHelper::getOutput()
 
 void FileHelper::cancel()
 {
+    canceled = true;
     if(ffmpegProcess!=NULL && ffmpegProcess->isOpen())
         ffmpegProcess->close();
 
@@ -221,6 +223,8 @@ void FileHelper::cancel()
 
 void FileHelper::handleFinish(int exitCode, QProcess::ExitStatus exitStatus)
 {
+    if(canceled)
+        return;
     if(secondConversion)
     {
         secondConversion = false;

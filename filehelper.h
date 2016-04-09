@@ -43,6 +43,7 @@ private:
    QString location2Path;
    bool secondConversion;
    bool secondCopy;
+   bool canceled;
    const qlonglong maxMultiFileTimeCutoff;
 };
 

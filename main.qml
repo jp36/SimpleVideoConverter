@@ -24,6 +24,7 @@ ApplicationWindow {
     readonly property string defaultPodcastArg: "-i <input>.mp4 -b:a 192K -vn -y <output>.mp3"
     readonly property string defaultSourceName: "Capture"
     readonly property string defaultOutputName: "Service"
+    readonly property bool defaultDeleteAfter: false
 
     property string videoArgumentString;
     property string podcastArgumentString;
@@ -70,6 +71,7 @@ ApplicationWindow {
                     SettingsHelper.setValue("sourcePath", text);
                 }
                 enabled: !isConverting
+                //error notification outline
                 Rectangle {
                     anchors.fill: parent
                     border.color: "red"
@@ -111,6 +113,7 @@ ApplicationWindow {
                     SettingsHelper.setValue("location1Path", text);
                 }
                 enabled: !isConverting
+                //error notification outline
                 Rectangle {
                     anchors.fill: parent
                     border.color: "red"
@@ -328,6 +331,7 @@ ApplicationWindow {
                     TextField {
                         id: videoArg
                         Layout.fillWidth: true
+                        //error notification outline
                         Rectangle {
                             anchors.fill: parent
                             border.color: "red"
@@ -346,6 +350,7 @@ ApplicationWindow {
                     TextField {
                         id: podcastArg
                         Layout.fillWidth: true
+                        //error notification outline
                         Rectangle {
                             anchors.fill: parent
                             border.color: "red"
@@ -364,6 +369,7 @@ ApplicationWindow {
                     TextField {
                         id: sourceName
                         Layout.fillWidth: true
+                        //error notification outline
                         Rectangle {
                             anchors.fill: parent
                             border.color: "red"
@@ -382,6 +388,7 @@ ApplicationWindow {
                     TextField {
                         id: outputName
                         Layout.fillWidth: true
+                        //error notification outline
                         Rectangle {
                             anchors.fill: parent
                             border.color: "red"
@@ -390,6 +397,18 @@ ApplicationWindow {
                         }
                     }
                 }
+                RowLayout {
+                    spacing: margin
+                    Layout.fillWidth: true
+                    Text {
+                        text: "Delete files after conversion (not yet implemented)"
+                    }
+
+                    CheckBox {
+                        id: deleteAfter
+                    }
+                }
+
                 Rectangle {
                     id: filler
                     Layout.fillHeight: true
@@ -434,6 +453,9 @@ ApplicationWindow {
             podcastArg.text = SettingsHelper.value("podcastArg", defaultPodcastArg);
             sourceName.text = SettingsHelper.value("sourceName", defaultSourceName);
             outputName.text = SettingsHelper.value("outputName", defaultOutputName);
+            //have to do ==true check as the SettingsHelper returns the
+            //bool as a string and checked expects an actual bool
+            deleteAfter.checked = (SettingsHelper.value("deleteAfter", defaultDeleteAfter)=="true");
         }
 
         function saveValues()
@@ -444,6 +466,7 @@ ApplicationWindow {
             SettingsHelper.setValue("podcastArg", podcastArg.text)
             SettingsHelper.setValue("sourceName", sourceName.text)
             SettingsHelper.setValue("outputName", outputName.text)
+            SettingsHelper.setValue("deleteAfter", deleteAfter.checked)
             return true;
         }
         function setDefaultValues() {
@@ -451,10 +474,12 @@ ApplicationWindow {
             podcastArg.text = defaultPodcastArg;
             sourceName.text = defaultSourceName;
             outputName.text = defaultOutputName;
+            deleteAfter.checked = defaultDeleteAfter;
             SettingsHelper.setValue("videoArg", defaultVideoArg)
             SettingsHelper.setValue("podcastArg", defaultPodcastArg)
             SettingsHelper.setValue("sourceName", defaultSourceName)
             SettingsHelper.setValue("outputName", defaultOutputName)
+            SettingsHelper.setValue("deleteAfter", defaultDeleteAfter)
         }
 
         onVisibleChanged: {
