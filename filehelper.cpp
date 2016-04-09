@@ -112,7 +112,8 @@ void FileHelper::start()
     }
     fileList.close();
 
-    location1Path = settings.value("location1Path", "").toString() + "/" + settings.value("outputName", "").toString() + "_" + QDate::currentDate().toString("yyyy_MM_dd");
+    //the escaped quotes are necessary for ffmpeg to work with paths with spaces
+    location1Path = "\"" + settings.value("location1Path", "").toString() + "/" + settings.value("outputName", "").toString() + "_" + QDate::currentDate().toString("yyyy_MM_dd") + "\"";
 //    argString.replace("<source>", finalSourcePath).replace("<output>", location1Path);
     argString.replace("<source>", sourcePath + "/mylist.txt").replace("<output>", location1Path);
 //    qDebug() << argString;
