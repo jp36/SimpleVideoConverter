@@ -24,7 +24,7 @@ protected:
     void startSecondConversion();
     QStack<QString> recursiveDateSearch(QStack<QString> resultStack, QString path, QString startsWith, int lastNum, QDateTime lastVideoTime);
     void startCopy();
-    QString getPath(QString settingString, QDate date);
+    QString getPath(QString settingString, QDate date, QString extension);
 
 protected slots:
     void handleFinish(int exitCode, QProcess::ExitStatus exitStatus);
@@ -41,10 +41,11 @@ private:
    QProcess* ffmpegProcess;
    QString location1Path;
    QString location2Path;
+   QString videoExtension;
+   QString podcastExtension;
    bool secondConversion;
    bool secondCopy;
    bool canceled;
-   const qlonglong maxMultiFileTimeCutoff;
 };
 
 #endif // FILEHELPER_H

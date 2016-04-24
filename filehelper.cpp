@@ -13,7 +13,7 @@
 #include "asyncio.h"
 
 FileHelper::FileHelper(QObject *parent)
-    : QObject(parent), secondCopy(false), maxMultiFileTimeCutoff(7201)//2 hours & 1 second
+    : QObject(parent), secondCopy(false)
 {
 }
 
@@ -32,21 +32,26 @@ QStack<QString> FileHelper::recursiveDateSearch(QStack<QString> resultStack, QSt
 {
     QDirIterator dirIt(path);
     QDateTime adjustedDateTime = lastVideoTime;
-    adjustedDateTime.setTime(lastVideoTime.time().addSecs(-maxMultiFileTimeCutoff));
 
     QSettings settings;
+
+    int maxFileCutoffDifference = settings.value("combinationCutoff", 7201).toInt();
+    if(maxFileCutoffDifference>0)
+        adjustedDateTime.setTime(lastVideoTime.time().addSecs(-maxFileCutoffDifference));
 
     while(dirIt.hasNext())
     {
         dirIt.next();
         //need to get the biggest file
-        if(dirIt.fileName().startsWith(startsWith) /*&& dirIt.fileInfo().created() >= adjustedDateTime*/ && dirIt.fileInfo().created()<lastVideoTime)
+        if(dirIt.fileName().startsWith(startsWith) && dirIt.fileInfo().created()<lastVideoTime)
         {
-
-            qDebug() << "Found possible file";
+            //skip this file if an adjusted date time is present and the new file was created before the adjusted time allows
+            if(maxFileCutoffDifference>0 && dirIt.fileInfo().created() < adjustedDateTime)
+                continue;
+            qDebug() << "Found possible file (recurse) - " << dirIt.fileInfo().baseName();
             QString tempString = dirIt.fileInfo().baseName().replace(settings.value("sourceName", "").toString(), "");
             int number = tempString.toDouble();
-            qDebug() << number;
+            qDebug() << "filenumber=" << number;
             if(number==(lastNum-1))
             {
                 resultStack.push(dirIt.fileInfo().fileName());
@@ -62,12 +67,11 @@ QStack<QString> FileHelper::recursiveDateSearch(QStack<QString> resultStack, QSt
 
 void FileHelper::startCopy()
 {
-    QSettings settings;
     QString extension;
     if(secondCopy)
-        extension = settings.value("podcastArg").toString().split("<output>")[1];
+        extension = podcastExtension;
     else
-        extension = settings.value("videoArg").toString().split("<output>")[1];
+        extension = videoExtension;
     //spawn thread
     QThread* thread = new QThread;
     //location1 = existing
@@ -89,14 +93,30 @@ void FileHelper::startCopy()
     thread->start();
 }
 
-QString FileHelper::getPath(QString settingString, QDate date)
+QString FileHelper::getPath(QString settingString, QDate date, QString extension)
 {
     QSettings settings;
     QString locationSettingString = settings.value(settingString, "").toString();
-    if(""!=locationSettingString)
-        return "\"" + locationSettingString + "/" + settings.value("outputName", "").toString() + "_" + date.toString("yyyy_MM_dd") + "\"";
-    else
-        return locationSettingString;//return nothing
+    if(""==locationSettingString)
+        return "";
+
+    //handle checking for exsiting files and appending integer
+    QString newFileString = locationSettingString + "/" + settings.value("outputName", "").toString() + "_" + date.toString("yyyy_MM_dd");
+    QFileInfo checkFile(newFileString + extension);
+    QString fileSuffix = "";
+    int counter = 0;
+    while(checkFile.exists() && checkFile.isFile())
+    {
+        if(counter>1000)
+        {
+            qDebug() << "Error in file overwrite protection code, exiting loop";
+            break;
+        }
+        fileSuffix = "(" + QString::number(++counter) + ")";
+        checkFile = QFileInfo(newFileString + fileSuffix + extension);
+    }
+
+    return "\"" + newFileString + fileSuffix + "\"";
 }
 
 //start conversion
@@ -122,12 +142,12 @@ void FileHelper::start()
         dirIt.next();
         if(dirIt.fileName().startsWith(settings.value("sourceName", "").toString()))
         {
-            qDebug() << "Found possible file";
+            qDebug() << "Found possible file - " << dirIt.fileInfo().baseName();
             //the replace basically removes everything except the number
             QString tempString = dirIt.fileInfo().baseName().replace(settings.value("sourceName", "").toString(), "");
             //convert string number to integer
             int number = tempString.toDouble();
-            qDebug() << number;
+            qDebug() << "filenumber=" << number;
             if(number>biggestNumber)
             {
                 biggestFileName = dirIt.fileName();
@@ -154,10 +174,12 @@ void FileHelper::start()
     }
     fileList.close();
 
+    videoExtension = settings.value("videoArg").toString().split("<output>")[1];
+    podcastExtension = settings.value("podcastArg").toString().split("<output>")[1];
+
     //the escaped quotes are necessary for ffmpeg to work with paths with spaces
-    QDate currentDate = QDate::currentDate();
-    location1Path = getPath("location1Path", currentDate);
-    location2Path = getPath("location2Path", currentDate);
+    location1Path = getPath("location1Path", biggestFileCreated.date(), videoExtension);
+    location2Path = getPath("location2Path", biggestFileCreated.date(), podcastExtension);
 //    argString.replace("<source>", finalSourcePath).replace("<output>", location1Path);
     argString.replace("<source>", sourcePath + "/mylist.txt").replace("<output>", location1Path);
 //    qDebug() << argString;

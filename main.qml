@@ -24,6 +24,7 @@ ApplicationWindow {
     readonly property string defaultPodcastArg: "-i <input>.mp4 -b:a 192K -vn -y <output>.mp3"
     readonly property string defaultSourceName: "Capture"
     readonly property string defaultOutputName: "Service"
+    readonly property string defaultCombinationCutoff: "7201"
     readonly property bool defaultDeleteAfter: false
 
     property string videoArgumentString;
@@ -401,6 +402,27 @@ ApplicationWindow {
                     spacing: margin
                     Layout.fillWidth: true
                     Text {
+                        text: "File combiner cutoff (in seconds): "
+                    }
+
+                    TextField {
+                        id: combinationCutoff
+                        Layout.fillWidth: true
+                        inputMethodHints: Qt.ImhDigitsOnly
+                        validator: IntValidator{bottom: 0}
+                        //error notification outline
+                        Rectangle {
+                            anchors.fill: parent
+                            border.color: "red"
+                            color: "transparent"
+                            visible: combinationCutoff.text==""
+                        }
+                    }
+                }
+                RowLayout {
+                    spacing: margin
+                    Layout.fillWidth: true
+                    Text {
                         text: "Delete files after conversion (not yet implemented)"
                     }
 
@@ -453,6 +475,7 @@ ApplicationWindow {
             podcastArg.text = SettingsHelper.value("podcastArg", defaultPodcastArg);
             sourceName.text = SettingsHelper.value("sourceName", defaultSourceName);
             outputName.text = SettingsHelper.value("outputName", defaultOutputName);
+            combinationCutoff.text = SettingsHelper.value("combinationCutoff", defaultCombinationCutoff);
             //have to do ==true check as the SettingsHelper returns the
             //bool as a string and checked expects an actual bool
             deleteAfter.checked = (SettingsHelper.value("deleteAfter", defaultDeleteAfter)=="true");
@@ -460,12 +483,13 @@ ApplicationWindow {
 
         function saveValues()
         {
-            if(videoArg.text==="" || podcastArg.text==="" || sourceName.text==="" || outputName.text==="")
+            if(videoArg.text==="" || podcastArg.text==="" || sourceName.text==="" || outputName.text==="" || combinationCutoff.text==="")
                 return false;
             SettingsHelper.setValue("videoArg", videoArg.text)
             SettingsHelper.setValue("podcastArg", podcastArg.text)
             SettingsHelper.setValue("sourceName", sourceName.text)
             SettingsHelper.setValue("outputName", outputName.text)
+            SettingsHelper.setValue("combinationCutoff", combinationCutoff.text)
             SettingsHelper.setValue("deleteAfter", deleteAfter.checked)
             return true;
         }
@@ -474,11 +498,13 @@ ApplicationWindow {
             podcastArg.text = defaultPodcastArg;
             sourceName.text = defaultSourceName;
             outputName.text = defaultOutputName;
+            combinationCutoff.text = defaultCombinationCutoff;
             deleteAfter.checked = defaultDeleteAfter;
             SettingsHelper.setValue("videoArg", defaultVideoArg)
             SettingsHelper.setValue("podcastArg", defaultPodcastArg)
             SettingsHelper.setValue("sourceName", defaultSourceName)
             SettingsHelper.setValue("outputName", defaultOutputName)
+            SettingsHelper.setValue("combinationCutoff", defaultCombinationCutoff)
             SettingsHelper.setValue("deleteAfter", defaultDeleteAfter)
         }
 
