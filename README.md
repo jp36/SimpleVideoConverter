@@ -13,7 +13,7 @@ http://www.qt.io/download/
 
 #Deployment
 ##Windows
-- copy exe file from built directory (Must be release version) to c:\converterDeploy\{version_folder}
+- copy QtFfmepgConverter.exe (Must be release version) and ffmpeg.exe files from built directory to c:\converterDeploy\{version_folder}
 - then run below:
 ```Batchfile
 //IMPORTANT - change 5.4 below to your current version Qt
