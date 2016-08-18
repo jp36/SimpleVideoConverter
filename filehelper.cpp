@@ -15,6 +15,13 @@
 FileHelper::FileHelper(QObject *parent)
     : QObject(parent), secondCopy(false)
 {
+#if defined(Q_OS_MAC)
+    ffmpegString = "/ffmpeg ";
+#elif defined(Q_OS_WIN)
+    ffmpegString = "/ffmpeg.exe ";
+#else
+    ffmpegString = "/ffmpeg ";
+#endif
 }
 
 FileHelper::~FileHelper()
@@ -193,9 +200,9 @@ void FileHelper::start()
     connect(ffmpegProcess, &QProcess::readyReadStandardError, this, &FileHelper::readyRead);
     connect(ffmpegProcess, (void (QProcess::*)(int,QProcess::ExitStatus))(&QProcess::finished), this, &FileHelper::handleFinish);
 //    connect(ffmpegProcess, (void (QProcess::*)(QProcess::ProcessError))(&QProcess::error), this, &FileHelper::handleFinish);
-    qDebug() << QFileInfo(QCoreApplication::applicationFilePath()).canonicalPath()+"/ffmpeg.exe " + argString;
+    qDebug() << QFileInfo(QCoreApplication::applicationFilePath()).canonicalPath()+ ffmpegString + argString;
 
-    ffmpegProcess->start(QFileInfo(QCoreApplication::applicationFilePath()).canonicalPath()+"/ffmpeg.exe " + argString);
+    ffmpegProcess->start(QFileInfo(QCoreApplication::applicationFilePath()).canonicalPath()+ ffmpegString + argString);
 }
 
 
@@ -217,7 +224,7 @@ void FileHelper::startSecondConversion()
     connect(ffmpegProcess, &QProcess::readyReadStandardOutput, this, &FileHelper::readyRead);
     connect(ffmpegProcess, &QProcess::readyReadStandardError, this, &FileHelper::readyRead);
     connect(ffmpegProcess, (void (QProcess::*)(int,QProcess::ExitStatus))(&QProcess::finished), this, &FileHelper::handleFinish);
-    ffmpegProcess->start(QFileInfo(QCoreApplication::applicationFilePath()).canonicalPath()+"/ffmpeg.exe " + argString);
+    ffmpegProcess->start(QFileInfo(QCoreApplication::applicationFilePath()).canonicalPath()+ffmpegString + argString);
 }
 
 QString FileHelper::getOutput()

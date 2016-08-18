@@ -46,6 +46,7 @@ private:
    bool secondConversion;
    bool secondCopy;
    bool canceled;
+   QString ffmpegString;
 };
 
 #endif // FILEHELPER_H

@@ -39,3 +39,10 @@ win32:{
          }
     }
 }
+macx:{
+    file_pathes += "\"$$PWD/libs/ffmpeg-mac/bin/ffmpeg\""
+    for(file_path,file_pathes){
+        message($$quote(cp $${file_path} $$OUT_PWD $$escape_expand(\n\t)))
+        QMAKE_POST_LINK += $$quote(cp $${file_path} $$OUT_PWD $$escape_expand(\n\t))
+    }
+}
