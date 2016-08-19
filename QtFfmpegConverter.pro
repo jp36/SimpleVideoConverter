@@ -23,6 +23,14 @@ HEADERS += \
     filehelper.h \
     asyncio.h
 
+#icons
+macx {
+    ICON = $$PWD/mac/icon.icns
+} else:win32:!winrt {
+    RC_ICONS = $$PWD/windows/favicon.ico
+}
+
+#code to handle copying ffmpeg where needed
 win32:{
 #windows code for copying ffmpeg to the built directory
     file_pathes += "\"$$PWD/libs/ffmpeg-win32/bin/ffmpeg.exe\""
