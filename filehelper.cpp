@@ -13,7 +13,7 @@
 #include "asyncio.h"
 
 FileHelper::FileHelper(QObject *parent)
-    : QObject(parent), secondCopy(false)
+    : QObject(parent), secondCopy(false), listFileName("/mylist.txt"), filePathList()
 {
 #if defined(Q_OS_MAC)
     ffmpegString = "/ffmpeg ";
@@ -170,12 +170,14 @@ void FileHelper::start()
     QStack<QString> resultStack;
     resultStack.push(biggestFileName);
     resultStack = recursiveDateSearch(resultStack, sourcePath, settings.value("sourceName", "").toString(), biggestNumber, biggestFileCreated);
-    QFile fileList(sourcePath + "/mylist.txt");
+    QFile fileList(sourcePath + listFileName);
     fileList.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text);
     QTextStream out(&fileList);
     while(resultStack.count()>0)
     {
-        out << "file '" << resultStack.pop() << "'";
+        QString fileName = resultStack.pop();
+        filePathList.append(sourcePath + "/" + fileName);
+        out << "file '" << fileName << "'";
         if(resultStack.count()!=0)
             out << "\n";
     }
@@ -188,7 +190,7 @@ void FileHelper::start()
     location1Path = getPath("location1Path", biggestFileCreated.date(), videoExtension);
     location2Path = getPath("location2Path", biggestFileCreated.date(), podcastExtension);
 //    argString.replace("<source>", finalSourcePath).replace("<output>", location1Path);
-    argString.replace("<source>", sourcePath + "/mylist.txt").replace("<output>", location1Path);
+    argString.replace("<source>", sourcePath + listFileName).replace("<output>", location1Path);
 //    qDebug() << argString;
 
     ffmpegProcess = new QProcess(this);
@@ -270,7 +272,7 @@ void FileHelper::handleFinish(int exitCode, QProcess::ExitStatus exitStatus)
         ffmpegProcess = NULL;
         //start copy if location2path has been defined
         if(""==location2Path)
-            emit encodingFinished();
+            doCleanupAndFinish();
         else
             startCopy();
     }
@@ -281,11 +283,31 @@ void FileHelper::handleFinish(int exitCode, QProcess::ExitStatus exitStatus)
 void FileHelper::copyFinished()
 {
     if(secondCopy)
-        emit encodingFinished();
+        doCleanupAndFinish();
     else
     {
         secondCopy = true;
         startCopy();
     }
+}
+
+void FileHelper::doCleanupAndFinish()
+{
+    QSettings settings;
+
+    if(settings.value("deleteAfter", false).toBool())
+    {
+        qDebug() << "Deleting -" << filePathList;
+        foreach(QString path, filePathList)
+        {
+            QFile::remove(path);
+        }
+    }
+    else
+    {
+        qDebug() << "skipping delete";
+    }
+
+    emit encodingFinished();
 }
 

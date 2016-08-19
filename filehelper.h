@@ -49,6 +49,7 @@ protected:
     QStack<QString> recursiveDateSearch(QStack<QString> resultStack, QString path, QString startsWith, int lastNum, QDateTime lastVideoTime);
     void startCopy();
     QString getPath(QString settingString, QDate date, QString extension);
+    void doCleanupAndFinish();
 
 protected slots:
     void handleFinish(int exitCode, QProcess::ExitStatus exitStatus);
@@ -72,6 +73,8 @@ private:
    bool canceled;
    QString ffmpegString;
    QString ffmpegPath;
+   QString listFileName;
+   QList<QString> filePathList;
 };
 
 #endif // FILEHELPER_H

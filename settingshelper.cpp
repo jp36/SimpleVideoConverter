@@ -21,3 +21,12 @@ void SettingsHelper::setValue(const QString &key, const QVariant &value)
     QSettings::setValue(key, value);
 }
 
+QString SettingsHelper::getVersion()
+{
+#ifdef APP_VERSION
+    return APP_VERSION;
+#else
+    return "1.0";
+#endif
+}
+

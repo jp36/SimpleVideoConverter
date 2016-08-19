@@ -1,5 +1,8 @@
 TEMPLATE = app
 
+VERSION = 1.0.1
+DEFINES += APP_VERSION=\\\"$$VERSION\\\"
+
 QT += qml quick widgets
 
 SOURCES += main.cpp \

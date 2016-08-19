@@ -47,6 +47,13 @@ ApplicationWindow {
                 onTriggered: settingsDialog.open();
             }
         }
+        Menu {
+            title: qsTr("&Help")
+            MenuItem {
+                text: qsTr("About")
+                onTriggered: aboutDialog.open();
+            }
+        }
     }
 
     ColumnLayout {
@@ -280,6 +287,16 @@ ApplicationWindow {
     }
 
     MessageDialog {
+        id: aboutDialog
+        title: "About"
+        text: "Simple Convert Version - " + SettingsHelper.getVersion()
+        standardButtons: StandardButton.Ok
+        onAccepted: {
+            aboutDialog.close()
+        }
+    }
+
+    MessageDialog {
         id: errorDialog
         title: "Error"
         icon: StandardIcon.Critical
@@ -429,7 +446,7 @@ ApplicationWindow {
                     spacing: margin
                     Layout.fillWidth: true
                     Text {
-                        text: "Delete files after conversion (not yet implemented)"
+                        text: "Delete files after conversion"
                     }
 
                     CheckBox {
