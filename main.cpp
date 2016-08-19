@@ -17,6 +17,10 @@ QObject *settingsHelper_provider(QQmlEngine *engine, QJSEngine * scriptEngine)
 
 int main(int argc, char *argv[])
 {
+#ifdef Q_OS_WIN
+    qputenv("QT_AUTO_SCREEN_SCALE_FACTOR", "1");
+#endif
+
     QApplication app(argc, argv);
     app.setOrganizationName("Crossway");
     app.setApplicationName("converter");

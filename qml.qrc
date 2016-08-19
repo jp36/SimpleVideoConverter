@@ -1,5 +1,9 @@
 <RCC>
     <qresource prefix="/">
         <file>main.qml</file>
+        <file>StyledText.qml</file>
+        <file>CustomTextFieldStyle.qml</file>
+        <file>CustomButtonStyle.qml</file>
+        <file>CustomTextAreaStyle.qml</file>
     </qresource>
 </RCC>

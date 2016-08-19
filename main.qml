@@ -68,11 +68,12 @@ ApplicationWindow {
             id: source
             spacing: margin
             Layout.fillWidth: true
-            Text {
+            StyledText {
                 text: "Source Location: "
             }
             TextField {
                 id: sourcePath
+                style: CustomTextFieldStyle {}
                 Layout.fillWidth: true
                 text: SettingsHelper.value("sourcePath", "");
                 onEditingFinished: {
@@ -88,6 +89,7 @@ ApplicationWindow {
                 }
             }
             Button {
+                style: CustomButtonStyle {}
                 text: "Browse"
                 onClicked: {
                     if(FileHelper.fileExists(sourcePath.text))
@@ -110,11 +112,12 @@ ApplicationWindow {
             id: location1
             spacing: margin
             Layout.fillWidth: true
-            Text {
+            StyledText {
                 text: "Google Drive Location: "
             }
             TextField {
                 id: location1Path
+                style: CustomTextFieldStyle {}
                 Layout.fillWidth: true
                 text: SettingsHelper.value("location1Path", "");
                 onEditingFinished: {
@@ -130,6 +133,7 @@ ApplicationWindow {
                 }
             }
             Button {
+                style: CustomButtonStyle {}
                 text: "Browse"
                 onClicked: {
                     if(FileHelper.fileExists(location1Path.text))
@@ -145,11 +149,12 @@ ApplicationWindow {
             id: location2
             spacing: margin
             Layout.fillWidth: true
-            Text {
+            StyledText {
                 text: "Shared Folder Location: "
             }
             TextField {
                 id: location2Path
+                style: CustomTextFieldStyle {}
                 Layout.fillWidth: true
                 text: SettingsHelper.value("location2Path", "");
                 onEditingFinished: {
@@ -158,6 +163,7 @@ ApplicationWindow {
                 enabled: !isConverting
             }
             Button {
+                style: CustomButtonStyle {}
                 text: "Browse"
                 onClicked: {
                     if(FileHelper.fileExists(location2Path.text))
@@ -178,6 +184,7 @@ ApplicationWindow {
 
         TextArea {
             id: ffmpegOutput
+            style: CustomTextAreaStyle {}
             Layout.fillHeight: true
             Layout.fillWidth: true
             readOnly: true
@@ -195,6 +202,7 @@ ApplicationWindow {
             layoutDirection: Qt.RightToLeft
             Button {
                 id: closeButton
+                style: CustomButtonStyle {}
                 text: "Close"
                 enabled: !isConverting
                 activeFocusOnPress: true;
@@ -202,6 +210,7 @@ ApplicationWindow {
             }
             Button {
                 id: convertButton
+                style: CustomButtonStyle {}
                 text: isConverting ? "Cancel" : "Convert"
                 enabled: sourcePath.text!="" && location1Path.text!=""
                 activeFocusOnPress: true;
@@ -348,12 +357,13 @@ ApplicationWindow {
                 RowLayout {
                     spacing: margin
                     Layout.fillWidth: true
-                    Text {
+                    StyledText {
                         text: "Video command: "
                     }
 
                     TextField {
                         id: videoArg
+                        style: CustomTextFieldStyle {}
                         Layout.fillWidth: true
                         //error notification outline
                         Rectangle {
@@ -367,12 +377,13 @@ ApplicationWindow {
                 RowLayout {
                     spacing: margin
                     Layout.fillWidth: true
-                    Text {
+                    StyledText {
                         text: "Podcast command: "
                     }
 
                     TextField {
                         id: podcastArg
+                        style: CustomTextFieldStyle {}
                         Layout.fillWidth: true
                         //error notification outline
                         Rectangle {
@@ -386,12 +397,13 @@ ApplicationWindow {
                 RowLayout {
                     spacing: margin
                     Layout.fillWidth: true
-                    Text {
+                    StyledText {
                         text: "Source File Name: "
                     }
 
                     TextField {
                         id: sourceName
+                        style: CustomTextFieldStyle {}
                         Layout.fillWidth: true
                         //error notification outline
                         Rectangle {
@@ -405,12 +417,13 @@ ApplicationWindow {
                 RowLayout {
                     spacing: margin
                     Layout.fillWidth: true
-                    Text {
+                    StyledText {
                         text: "Output File Name: "
                     }
 
                     TextField {
                         id: outputName
+                        style: CustomTextFieldStyle {}
                         Layout.fillWidth: true
                         //error notification outline
                         Rectangle {
@@ -424,12 +437,13 @@ ApplicationWindow {
                 RowLayout {
                     spacing: margin
                     Layout.fillWidth: true
-                    Text {
+                    StyledText {
                         text: "File combiner cutoff (in seconds): "
                     }
 
                     TextField {
                         id: combinationCutoff
+                        style: CustomTextFieldStyle {}
                         Layout.fillWidth: true
                         inputMethodHints: Qt.ImhDigitsOnly
                         validator: IntValidator{bottom: 0}
@@ -445,7 +459,7 @@ ApplicationWindow {
                 RowLayout {
                     spacing: margin
                     Layout.fillWidth: true
-                    Text {
+                    StyledText {
                         text: "Delete files after conversion"
                     }
 
@@ -465,6 +479,7 @@ ApplicationWindow {
                     Layout.fillWidth: true
                     layoutDirection: Qt.RightToLeft
                     Button {
+                        style: CustomButtonStyle {}
                         text: "Save"
                         enabled: videoArg.text!="" && podcastArg.text!="" && sourceName.text!="" && outputName.text!=""
                         onClicked: {
@@ -473,6 +488,7 @@ ApplicationWindow {
                         }
                     }
                     Button {
+                        style: CustomButtonStyle {}
                         text: "Cancel"
                         onClicked: settingsDialog.rejected()
                     }
@@ -481,6 +497,7 @@ ApplicationWindow {
                         Layout.fillWidth: true
                     }
                     Button {
+                        style: CustomButtonStyle {}
                         text: "Restore Defaults"
                         onClicked: settingsDialog.reset()
                     }

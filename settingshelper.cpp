@@ -30,3 +30,12 @@ QString SettingsHelper::getVersion()
 #endif
 }
 
+int SettingsHelper::fontSize()
+{
+#if defined(Q_OS_MAC)
+    return 12;
+#else
+    return 10;
+#endif
+}
+
