@@ -259,8 +259,14 @@ ApplicationWindow {
             var path = fileUrl.toString();
             // remove prefixed "file:///"
             path= path.replace(/^(file:\/{3})|(qrc:\/{2})|(http:\/{2})/,"");
+            if(FileHelper.platformId() == 5)//mac
+            {
+                if(path.charAt(0)!='/')
+                    path = "/" + path;
+            }
             // unescape html codes like '%23' for '#'
             var cleanPath = decodeURIComponent(path);
+
             console.log("You chose: " + cleanPath)
             if(textFieldToEdit)
             {

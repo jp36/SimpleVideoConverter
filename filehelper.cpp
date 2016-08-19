@@ -199,10 +199,19 @@ void FileHelper::start()
     connect(ffmpegProcess, &QProcess::readyReadStandardOutput, this, &FileHelper::readyRead);
     connect(ffmpegProcess, &QProcess::readyReadStandardError, this, &FileHelper::readyRead);
     connect(ffmpegProcess, (void (QProcess::*)(int,QProcess::ExitStatus))(&QProcess::finished), this, &FileHelper::handleFinish);
-//    connect(ffmpegProcess, (void (QProcess::*)(QProcess::ProcessError))(&QProcess::error), this, &FileHelper::handleFinish);
-    qDebug() << QFileInfo(QCoreApplication::applicationFilePath()).canonicalPath()+ ffmpegString + argString;
 
-    ffmpegProcess->start(QFileInfo(QCoreApplication::applicationFilePath()).canonicalPath()+ ffmpegString + argString);
+    ffmpegPath = QCoreApplication::applicationDirPath();
+#if defined(Q_OS_MAC)
+    QDir dir(ffmpegPath);
+    dir.cdUp();
+    dir.cd("Resources");
+    ffmpegPath = dir.absolutePath();
+#endif
+
+//    connect(ffmpegProcess, (void (QProcess::*)(QProcess::ProcessError))(&QProcess::error), this, &FileHelper::handleFinish);
+    qDebug() << ffmpegPath + ffmpegString + argString;
+
+    ffmpegProcess->start(ffmpegPath + ffmpegString + argString);
 }
 
 
@@ -224,7 +233,7 @@ void FileHelper::startSecondConversion()
     connect(ffmpegProcess, &QProcess::readyReadStandardOutput, this, &FileHelper::readyRead);
     connect(ffmpegProcess, &QProcess::readyReadStandardError, this, &FileHelper::readyRead);
     connect(ffmpegProcess, (void (QProcess::*)(int,QProcess::ExitStatus))(&QProcess::finished), this, &FileHelper::handleFinish);
-    ffmpegProcess->start(QFileInfo(QCoreApplication::applicationFilePath()).canonicalPath()+ffmpegString + argString);
+    ffmpegProcess->start(ffmpegPath + ffmpegString + argString);
 }
 
 QString FileHelper::getOutput()

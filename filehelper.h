@@ -15,6 +15,30 @@ public:
 
     Q_INVOKABLE bool fileExists(QString path);
 
+    Q_INVOKABLE int platformId() const {
+            int tempId = -1;
+    #if defined(Q_OS_ANDROID)
+            tempId = 0;
+    #elif defined(Q_OS_IOS)
+            tempId = 1;
+    #elif defined(Q_OS_BLACKBERRY)
+            tempId = 2;
+    #elif defined(Q_OS_WINPHONE)
+            tempId = 3;
+    #elif defined(Q_OS_LINUX)
+            tempId = 4;
+    #elif defined(Q_OS_MAC)
+            tempId = 5;
+    #elif defined(Q_OS_WINRT)
+            tempId = 7;
+    #elif defined(Q_OS_WIN)
+            tempId = 6;
+    #elif defined(Q_OS_QNX)
+            tempId = 8;
+    #endif
+            return tempId;
+        }
+
 public slots:
     void start();
     QString getOutput();
@@ -47,6 +71,7 @@ private:
    bool secondCopy;
    bool canceled;
    QString ffmpegString;
+   QString ffmpegPath;
 };
 
 #endif // FILEHELPER_H
