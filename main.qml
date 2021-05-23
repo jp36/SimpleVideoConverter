@@ -68,7 +68,7 @@ ApplicationWindow {
             id: source
             spacing: margin
             Layout.fillWidth: true
-            StyledText {
+            StyledLabel {
                 text: "Source Location: "
             }
             TextField {
@@ -112,7 +112,7 @@ ApplicationWindow {
             id: location1
             spacing: margin
             Layout.fillWidth: true
-            StyledText {
+            StyledLabel {
                 text: "Google Drive Location: "
             }
             TextField {
@@ -149,7 +149,7 @@ ApplicationWindow {
             id: location2
             spacing: margin
             Layout.fillWidth: true
-            StyledText {
+            StyledLabel {
                 text: "Shared Folder Location: "
             }
             TextField {
@@ -198,7 +198,7 @@ ApplicationWindow {
         RowLayout {
             id: buttonBar
             spacing: margin
-            anchors.right: parent.right
+            Layout.alignment: Qt.AlignRight
             layoutDirection: Qt.RightToLeft
             Button {
                 id: closeButton
@@ -334,7 +334,7 @@ ApplicationWindow {
         id: settingsDialog
         title: "Settings"
         width: 600
-        height: 200
+        height: 300
 //        standardButtons: StandardButton.Cancel | StandardButton.Save | StandardButton.RestoreDefaults
 
         contentItem: Rectangle {
@@ -357,7 +357,7 @@ ApplicationWindow {
                 RowLayout {
                     spacing: margin
                     Layout.fillWidth: true
-                    StyledText {
+                    StyledLabel {
                         text: "Video command: "
                     }
 
@@ -377,7 +377,7 @@ ApplicationWindow {
                 RowLayout {
                     spacing: margin
                     Layout.fillWidth: true
-                    StyledText {
+                    StyledLabel {
                         text: "Podcast command: "
                     }
 
@@ -397,7 +397,7 @@ ApplicationWindow {
                 RowLayout {
                     spacing: margin
                     Layout.fillWidth: true
-                    StyledText {
+                    StyledLabel {
                         text: "Source File Name: "
                     }
 
@@ -417,7 +417,7 @@ ApplicationWindow {
                 RowLayout {
                     spacing: margin
                     Layout.fillWidth: true
-                    StyledText {
+                    StyledLabel {
                         text: "Output File Name: "
                     }
 
@@ -437,7 +437,7 @@ ApplicationWindow {
                 RowLayout {
                     spacing: margin
                     Layout.fillWidth: true
-                    StyledText {
+                    StyledLabel {
                         text: "File combiner cutoff (in seconds): "
                     }
 
@@ -459,7 +459,7 @@ ApplicationWindow {
                 RowLayout {
                     spacing: margin
                     Layout.fillWidth: true
-                    StyledText {
+                    StyledLabel {
                         text: "Delete files after conversion"
                     }
 
